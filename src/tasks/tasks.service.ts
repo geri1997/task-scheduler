@@ -91,10 +91,24 @@ export class TasksService {
 
   async updateTask(taskId: string, updateTaskDto: UpdateTaskDto) {
     try {
+      if (!ObjectId.isValid(taskId))
+        throw new BadRequestException('Id not valid!');
+
       return this.tasksRepository.updateOne(
         { _id: new ObjectId(taskId) },
         updateTaskDto,
       );
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  async deleteTask(taskId: string) {
+    try {
+      if (!ObjectId.isValid(taskId))
+        throw new BadRequestException('Id not valid!');
+
+      return this.tasksRepository.deleteOne({ _id: new ObjectId(taskId) });
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }

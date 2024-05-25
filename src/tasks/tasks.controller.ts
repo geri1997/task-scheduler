@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -40,11 +41,16 @@ export class TasksController {
     return this.tasksService.assignTaskToUser(assignTaskDto);
   }
 
-  @Put('/:id/')
+  @Put('/:id')
   updateTask(
     @Param('id') taskId: string,
-    @Body() updateTaskStatusDto: UpdateTaskDto,
+    @Body() updateTaskDto: UpdateTaskDto,
   ) {
-    return this.tasksService.updateTask(taskId, updateTaskStatusDto);
+    return this.tasksService.updateTask(taskId, updateTaskDto);
+  }
+
+  @Delete('/:id')
+  deleteTask(@Param('id') taskId: string) {
+    return this.tasksService.deleteTask(taskId);
   }
 }

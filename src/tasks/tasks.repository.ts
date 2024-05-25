@@ -36,4 +36,12 @@ export class TasksRepository {
       throw new BadRequestException('Something went wrong when updating task!');
     }
   }
+
+  async deleteOne(filterQuery: FilterQuery<Task>) {
+    try {
+      return this.taskModel.deleteOne(filterQuery);
+    } catch (error) {
+      throw new BadRequestException('Something went wrong when deletig task!');
+    }
+  }
 }
