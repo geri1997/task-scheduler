@@ -4,10 +4,15 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { Task } from './task.schema';
 import { JwtPayload } from 'src/shared/interfaces/jwt-payload.interface';
 import { ObjectId } from 'mongodb';
+import { AssignTaskDto } from './dto/assign-task.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly tasksRepository: TasksRepository) {}
+  constructor(
+    private readonly tasksRepository: TasksRepository,
+    private readonly usersService: UsersService,
+  ) {}
 
   async createTask(
     createTaskDto: CreateTaskDto,
@@ -26,8 +31,7 @@ export class TasksService {
 
   async findTaskById(id: string): Promise<Task> {
     try {
-      if (!ObjectId.isValid(id))
-        throw new BadRequestException('id is not valid!');
+      if (!ObjectId.isValid(id)) throw new BadRequestException('Id not valid!');
 
       const foundTask = await this.tasksRepository.findOne(
         {
@@ -41,6 +45,28 @@ export class TasksService {
       );
 
       return foundTask;
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  async assignTaskToUser(assignTaskDto: AssignTaskDto) {
+    try {
+      const { taskId, userId } = assignTaskDto;
+      if (!ObjectId.isValid(taskId) || !ObjectId.isValid(userId))
+        throw new BadRequestException('Id not valid!');
+
+      const updatedTask = this.tasksRepository.updateOne(
+        {
+          _id: new ObjectId(taskId),
+        },
+        { assignedTo: userId },
+      );
+
+      const updatedUser = this.usersService.assignTaskToUser(taskId, userId);
+
+      await Promise.all([updatedTask, updatedUser]);
+      return { success: true };
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }

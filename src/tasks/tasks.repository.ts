@@ -1,6 +1,6 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, PopulateOptions } from 'mongoose';
+import { FilterQuery, Model, PopulateOptions, UpdateQuery } from 'mongoose';
 import { Task } from './task.schema';
 
 @Injectable()
@@ -22,10 +22,18 @@ export class TasksRepository {
         populate,
       });
     } catch (error) {
-      throw new HttpException(
-        'Something went wrong when finding task!',
-        error.status,
-      );
+      throw new BadRequestException('Something went wrong when finding task!');
+    }
+  }
+
+  async updateOne(
+    filterQuery: FilterQuery<Task>,
+    updateQuery: UpdateQuery<Task>,
+  ) {
+    try {
+      return this.taskModel.updateOne(filterQuery, updateQuery);
+    } catch (error) {
+      throw new BadRequestException('Something went wrong when updating task!');
     }
   }
 }

@@ -6,7 +6,7 @@ import {
 import { UsersRepository } from './users.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.schema';
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, PopulateOptions } from 'mongoose';
 import { JwtPayload } from 'src/shared/interfaces/jwt-payload.interface';
 import { ObjectId } from 'mongodb';
 
@@ -33,10 +33,12 @@ export class UsersService {
   private async findUser(
     filterQuery: FilterQuery<User>,
     projection?: { [key in keyof User]?: 0 | 1 },
+    populate?: PopulateOptions,
   ): Promise<User> {
     const foundUser = await this.usersRepository.findOne(
       filterQuery,
       projection,
+      populate,
     );
 
     return foundUser;
@@ -46,7 +48,33 @@ export class UsersService {
     return await this.findUser({ _id: new ObjectId(id) });
   }
 
-  async getUserProfile(currentUser: JwtPayload) {
-    return await this.findUser({ email: currentUser.email }, { password: 0 });
+  async getCurrentUserProfile(currentUser: JwtPayload) {
+    return await this.findUser(
+      { email: currentUser.email },
+      { password: 0 },
+      {
+        path: 'assignedTasks',
+        populate: {
+          path: 'createdBy',
+          model: User.name,
+          select: { createdAt: 0, updatedAt: 0, password: 0 },
+        },
+      },
+    );
+  }
+
+  async assignTaskToUser(taskId: string, userId: string) {
+    try {
+      return await this.usersRepository.updateOne(
+        {
+          _id: new ObjectId(userId),
+        },
+        {
+          $push: { assignedTasks: taskId },
+        },
+      );
+    } catch (error) {
+      throw new BadRequestException('Could not assign task to user!');
+    }
   }
 }

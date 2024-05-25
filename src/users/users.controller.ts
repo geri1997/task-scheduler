@@ -13,6 +13,6 @@ export class UsersController {
 
   @Get('profile')
   getUserProfile(@CurrentUser() currentUser: JwtPayload) {
-    return this.usersService.getUserProfile(currentUser);
+    return this.usersService.getCurrentUserProfile(currentUser);
   }
 }

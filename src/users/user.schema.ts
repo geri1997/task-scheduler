@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, HydratedDocument } from 'mongoose';
+import mongoose, { Document, HydratedDocument } from 'mongoose';
+import { Task } from 'src/tasks/task.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -20,8 +21,11 @@ export class User extends Document {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ default: [] })
-  assignedTasks: string[];
+  @Prop({
+    default: [],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' }],
+  })
+  assignedTasks: string[] | Task[];
 
   @Prop()
   role?: string;
