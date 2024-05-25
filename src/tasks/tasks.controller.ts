@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
@@ -16,6 +17,7 @@ import { JwtPayload } from 'src/shared/interfaces/jwt-payload.interface';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { AssignTaskDto } from './dto/assign-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { QueryDto } from "./dto/query.dto";
 
 @ApiTags('tasks')
 @UseGuards(JwtAuthGuard)
@@ -29,6 +31,11 @@ export class TasksController {
     @Body() createTaskDto: CreateTaskDto,
   ) {
     return this.tasksService.createTask(createTaskDto, currentUser);
+  }
+
+  @Get()
+  getTasks(@Query() queryDto: QueryDto) {
+    return this.tasksService.getTasks(queryDto);
   }
 
   @Get('/:id')

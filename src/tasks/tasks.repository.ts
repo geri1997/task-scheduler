@@ -1,7 +1,8 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, PopulateOptions, UpdateQuery } from 'mongoose';
 import { Task } from './task.schema';
+import { QueryDto } from './dto/query.dto';
 
 @Injectable()
 export class TasksRepository {
@@ -35,6 +36,26 @@ export class TasksRepository {
     } catch (error) {
       throw new BadRequestException('Something went wrong when updating task!');
     }
+  }
+
+  async findAll(
+    filterQuery: FilterQuery<Task>,
+    projection: { [key in keyof Task]?: 0 | 1 } = {},
+    options: {
+      queryDto: QueryDto;
+      populate?: PopulateOptions;
+    },
+  ) {
+    return this.taskModel
+      .find(filterQuery, projection, {
+        limit: options.queryDto.size || 10,
+        skip: options.queryDto.page - 1 || 0,
+        populate: options.populate,
+      })
+      .sort({
+        [options.queryDto.sortBy || 'createdAt']:
+          options.queryDto.sort || 'asc',
+      });
   }
 
   async deleteOne(filterQuery: FilterQuery<Task>) {

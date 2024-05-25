@@ -7,6 +7,7 @@ import { ObjectId } from 'mongodb';
 import { AssignTaskDto } from './dto/assign-task.dto';
 import { UsersService } from 'src/users/users.service';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { QueryDto } from './dto/query.dto';
 
 @Injectable()
 export class TasksService {
@@ -109,6 +110,39 @@ export class TasksService {
         throw new BadRequestException('Id not valid!');
 
       return this.tasksRepository.deleteOne({ _id: new ObjectId(taskId) });
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  async getTasks(queryDto: QueryDto) {
+    try {
+      return this.tasksRepository.findAll(
+        {
+          ...(queryDto.user && { assignedTo: new ObjectId(queryDto.user) }),
+          ...(queryDto.status && { status: queryDto.status }),
+          ...(queryDto.dateCreated && {
+            createdAt: {
+              $gte: new Date(queryDto.dateCreated).setUTCHours(0, 0, 0, 0),
+              $lt: new Date(queryDto.dateCreated).setUTCHours(23, 59, 59, 999),
+            },
+          }),
+          ...(queryDto.dateUpdated && {
+            updatedAt: {
+              $gte: new Date(queryDto.dateUpdated).setUTCHours(0, 0, 0, 0),
+              $lt: new Date(queryDto.dateUpdated).setUTCHours(23, 59, 59, 999),
+            },
+          }),
+        },
+        {},
+        {
+          queryDto,
+          populate: {
+            path: 'assignedTo',
+            select: { createdAt: 0, updatedAt: 0, password: 0 },
+          },
+        },
+      );
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }
