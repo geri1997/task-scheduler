@@ -18,7 +18,10 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signUp(createUserDto: CreateUserDto): Promise<{ accessToken: string }> {
+  async signUp(
+    createUserDto: CreateUserDto,
+    imageFile: Express.Multer.File = null,
+  ): Promise<{ accessToken: string }> {
     try {
       const salt = 10;
 
@@ -27,6 +30,7 @@ export class AuthService {
       const createdUser = await this.usersService.createUser({
         ...createUserDto,
         password: hashedPassword,
+        ...(imageFile && { image: imageFile?.buffer?.toString('base64') }),
       });
 
       const payload = this.constructJwtPayload(createdUser);
