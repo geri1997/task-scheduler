@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from 'src/users/dto/login.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -19,6 +19,11 @@ export class AuthController {
 
   @Post('sign-up')
   @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Create user dto',
+    type: CreateUserDto,
+  })
   signUp(
     @Body() createUserDto: CreateUserDto,
     @UploadedFile(

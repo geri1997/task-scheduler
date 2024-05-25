@@ -35,11 +35,12 @@ export class CreateUserDto {
   })
   password: string;
 
-  @ApiProperty({ example: 'Software Engineer' })
+  @ApiProperty({ example: 'Software Engineer', required: false })
   @IsString()
   @IsNotEmpty()
   @IsOptional()
   role?: string;
 
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
   image?: string;
 }

@@ -17,6 +17,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('Task Scheduler App')
     .setDescription('Api description of Task Scheduler App')
     .setVersion('1.0')
