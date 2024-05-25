@@ -6,6 +6,7 @@ import { JwtPayload } from 'src/shared/interfaces/jwt-payload.interface';
 import { ObjectId } from 'mongodb';
 import { AssignTaskDto } from './dto/assign-task.dto';
 import { UsersService } from 'src/users/users.service';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
 export class TasksService {
@@ -41,6 +42,10 @@ export class TasksService {
         {
           path: 'createdBy',
           select: { password: 0, createdAt: 0, updatedAt: 0 },
+          populate: {
+            path: 'assignedTasks',
+            model: Task.name,
+          },
         },
       );
 
@@ -79,6 +84,17 @@ export class TasksService {
 
       await Promise.all(promiseArr);
       return { success: true };
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  async updateTask(taskId: string, updateTaskDto: UpdateTaskDto) {
+    try {
+      return this.tasksRepository.updateOne(
+        { _id: new ObjectId(taskId) },
+        updateTaskDto,
+      );
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }

@@ -27,29 +27,15 @@ export class UsersService {
   }
 
   async findUserByEmail(email: string) {
-    return await this.findUser({ email });
-  }
-
-  private async findUser(
-    filterQuery: FilterQuery<User>,
-    projection?: { [key in keyof User]?: 0 | 1 },
-    populate?: PopulateOptions,
-  ): Promise<User> {
-    const foundUser = await this.usersRepository.findOne(
-      filterQuery,
-      projection,
-      populate,
-    );
-
-    return foundUser;
+    return await this.usersRepository.findOne({ email });
   }
 
   async findUserById(id: string) {
-    return await this.findUser({ _id: new ObjectId(id) });
+    return await this.usersRepository.findOne({ _id: new ObjectId(id) });
   }
 
   async getCurrentUserProfile(currentUser: JwtPayload) {
-    return await this.findUser(
+    return await this.usersRepository.findOne(
       { email: currentUser.email },
       { password: 0 },
       {
