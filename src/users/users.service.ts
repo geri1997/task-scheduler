@@ -8,6 +8,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.schema';
 import { FilterQuery } from 'mongoose';
 import { JwtPayload } from 'src/shared/interfaces/jwt-payload.interface';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class UsersService {
@@ -39,6 +40,10 @@ export class UsersService {
     );
 
     return foundUser;
+  }
+
+  async findUserById(id: string) {
+    return await this.findUser({ _id: new ObjectId(id) });
   }
 
   async getUserProfile(currentUser: JwtPayload) {

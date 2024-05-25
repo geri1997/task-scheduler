@@ -20,7 +20,7 @@ export class UsersRepository {
     try {
       return await this.userModel.findOne(filterQuery, projection);
     } catch (error) {
-      throw new BadRequestException(' Something went wrong when finding user!');
+      throw new BadRequestException('Something went wrong when finding user!');
     }
   }
 }
