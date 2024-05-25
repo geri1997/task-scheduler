@@ -7,6 +7,7 @@ import { UsersRepository } from './users.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.schema';
 import { FilterQuery } from 'mongoose';
+import { JwtPayload } from 'src/shared/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class UsersService {
@@ -24,9 +25,23 @@ export class UsersService {
     }
   }
 
-  async findUser(filterQuery: FilterQuery<User>): Promise<User> {
-    const foundUser = await this.usersRepository.findOne(filterQuery);
+  async findUserByEmail(email: string) {
+    return await this.findUser({ email });
+  }
+
+  private async findUser(
+    filterQuery: FilterQuery<User>,
+    projection?: { [key in keyof User]?: 0 | 1 },
+  ): Promise<User> {
+    const foundUser = await this.usersRepository.findOne(
+      filterQuery,
+      projection,
+    );
 
     return foundUser;
+  }
+
+  async getUserProfile(currentUser: JwtPayload) {
+    return await this.findUser({ email: currentUser.email }, { password: 0 });
   }
 }

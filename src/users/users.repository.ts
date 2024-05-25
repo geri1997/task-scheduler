@@ -9,16 +9,16 @@ export class UsersRepository {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async createOne(createUserDto: CreateUserDto): Promise<User> {
-      const createdUser = new this.userModel(createUserDto);
-      return createdUser.save();
-    
+    const createdUser = new this.userModel(createUserDto);
+    return createdUser.save();
   }
 
-  async findOne(filterQuery: FilterQuery<User>) {
+  async findOne(
+    filterQuery: FilterQuery<User>,
+    projection: { [key in keyof User]?: 0 | 1 } = {},
+  ) {
     try {
-      return await this.userModel.findOne(
-        filterQuery,
-      );
+      return await this.userModel.findOne(filterQuery, projection);
     } catch (error) {
       throw new BadRequestException(' Something went wrong when finding user!');
     }
