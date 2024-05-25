@@ -56,6 +56,17 @@ export class TasksService {
       if (!ObjectId.isValid(taskId) || !ObjectId.isValid(userId))
         throw new BadRequestException('Id not valid!');
 
+      const previouslyAssignedTo = await this.usersService.findUserByTaskId(
+        taskId,
+      );
+
+      if (previouslyAssignedTo) {
+        await this.usersService.unassignTaskFromUser(
+          taskId,
+          previouslyAssignedTo._id.toString(),
+        );
+      }
+
       const updatedTask = this.tasksRepository.updateOne(
         {
           _id: new ObjectId(taskId),
@@ -63,9 +74,10 @@ export class TasksService {
         { assignedTo: userId },
       );
 
-      const updatedUser = this.usersService.assignTaskToUser(taskId, userId);
+      const assignedUser = this.usersService.assignTaskToUser(taskId, userId);
+      const promiseArr = [updatedTask, assignedUser];
 
-      await Promise.all([updatedTask, updatedUser]);
+      await Promise.all(promiseArr);
       return { success: true };
     } catch (error) {
       throw new HttpException(error.message, error.status);

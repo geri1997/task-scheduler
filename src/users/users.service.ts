@@ -54,11 +54,6 @@ export class UsersService {
       { password: 0 },
       {
         path: 'assignedTasks',
-        populate: {
-          path: 'createdBy',
-          model: User.name,
-          select: { createdAt: 0, updatedAt: 0, password: 0 },
-        },
       },
     );
   }
@@ -75,6 +70,33 @@ export class UsersService {
       );
     } catch (error) {
       throw new BadRequestException('Could not assign task to user!');
+    }
+  }
+
+  async unassignTaskFromUser(taskId: string, userId: string) {
+    try {
+      return await this.usersRepository.updateOne(
+        {
+          _id: new ObjectId(userId),
+        },
+        {
+          $pull: { assignedTasks: taskId },
+        },
+      );
+    } catch (error) {
+      throw new BadRequestException('Could not unassign task to user!');
+    }
+  }
+
+  async findUserByTaskId(taskId: string) {
+    try {
+      return await this.usersRepository.findOne({
+        assignedTasks: new ObjectId(taskId),
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        'Someting went wrong when finding user by task id!',
+      );
     }
   }
 }
