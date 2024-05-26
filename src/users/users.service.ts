@@ -81,7 +81,7 @@ export class UsersService {
       });
     } catch (error) {
       throw new BadRequestException(
-        'Someting went wrong when finding user by task id!',
+        'Something went wrong when finding user by task id!',
       );
     }
   }

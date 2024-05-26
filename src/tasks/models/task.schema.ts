@@ -3,6 +3,7 @@ import mongoose, { Document, HydratedDocument } from 'mongoose';
 import { User } from 'src/users/user.schema';
 import { TaskStatus } from '../enum/task-status.enum';
 import { Comment } from './comment.model';
+import { TaskType } from '../enum/task-type.enum';
 
 export type TaskDocument = HydratedDocument<Task>;
 
@@ -21,8 +22,11 @@ export class Task extends Document {
   })
   createdBy: string | User;
 
-  @Prop({ default: TaskStatus.TO_DO })
+  @Prop({ default: TaskStatus.BACKLOG })
   status: TaskStatus;
+
+  @Prop({ required: true })
+  type: TaskType;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,

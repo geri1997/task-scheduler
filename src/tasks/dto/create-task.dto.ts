@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
+import { TaskType } from '../enum/task-type.enum';
 
 export class CreateTaskDto {
   @ApiProperty({ example: 'Task title', required: true })
@@ -11,6 +12,11 @@ export class CreateTaskDto {
   @IsString()
   @IsNotEmpty()
   description: string;
+
+  @ApiProperty({ example: TaskType.CONTENT, required: true, enum: TaskType })
+  @IsEnum(TaskType)
+  @IsNotEmpty()
+  type: TaskType;
 
   attachments?: string[];
 }
