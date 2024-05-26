@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from 'src/users/dto/login.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -17,6 +17,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiOperation({
+    description: 'Endpoint to sign up as a user.',
+  })
   @Post('sign-up')
   @UseInterceptors(FileInterceptor('image'))
   @ApiConsumes('multipart/form-data')
@@ -43,6 +46,9 @@ export class AuthController {
     return this.authService.signUp(createUserDto, imageFile);
   }
 
+  @ApiOperation({
+    description: 'Endpoint to login as a user.',
+  })
   @Post('login')
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);

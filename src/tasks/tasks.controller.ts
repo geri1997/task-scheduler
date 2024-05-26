@@ -13,6 +13,7 @@ import { TasksService } from './tasks.service';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -34,6 +35,9 @@ import { QueryDto } from './dto/query.dto';
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
+  @ApiOperation({
+    description: 'Endpoint to create a new task.',
+  })
   @Post()
   createTask(
     @CurrentUser() currentUser: JwtPayload,
@@ -42,23 +46,35 @@ export class TasksController {
     return this.tasksService.createTask(createTaskDto, currentUser);
   }
 
+  @ApiOperation({
+    description: 'Endpoint to get filtered tasks with pagination.',
+  })
   @Get()
   getTasks(@Query() queryDto: QueryDto) {
     return this.tasksService.getTasks(queryDto);
   }
 
+  @ApiOperation({
+    description: 'Endpoint to get a single task by id.',
+  })
   @Get('/:id')
   getTaskById(@Param('id') id: string) {
     return this.tasksService.findTaskById(id);
   }
 
+  @ApiOperation({
+    description: 'Endpoint to assign a task to a user.',
+  })
   @Put('/assign')
   assignTaskToUser(@Body() assignTaskDto: AssignTaskDto) {
     return this.tasksService.assignTaskToUser(assignTaskDto);
   }
 
+  @ApiOperation({
+    description: 'Endpoint to update a task.',
+  })
   @ApiBody({
-    description: 'Create task dto',
+    description: 'Update task dto',
     type: UpdateTaskDto,
   })
   @Put('/:id')
@@ -69,6 +85,9 @@ export class TasksController {
     return this.tasksService.updateTask(taskId, updateTaskDto);
   }
 
+  @ApiOperation({
+    description: 'Endpoint to delete a task by id.',
+  })
   @Delete('/:id')
   deleteTask(@Param('id') taskId: string) {
     return this.tasksService.deleteTask(taskId);
