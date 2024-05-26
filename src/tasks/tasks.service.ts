@@ -1,7 +1,7 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { TasksRepository } from './tasks.repository';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { Task } from './task.schema';
+import { Task } from './models/task.schema';
 import { JwtPayload } from 'src/shared/interfaces/jwt-payload.interface';
 import { ObjectId } from 'mongodb';
 import { AssignTaskDto } from './dto/assign-task.dto';
@@ -40,14 +40,20 @@ export class TasksService {
           _id: new ObjectId(id),
         },
         {},
-        {
-          path: 'createdBy',
-          select: { password: 0, createdAt: 0, updatedAt: 0 },
-          populate: {
-            path: 'assignedTasks',
-            model: Task.name,
+        [
+          {
+            path: 'createdBy',
+            select: { password: 0, createdAt: 0, updatedAt: 0 },
+            populate: {
+              path: 'assignedTasks',
+              model: Task.name,
+            },
           },
-        },
+          {
+            path: 'comments.user',
+            select: { createdAt: 0, updatedAt: 0, password: 0 },
+          },
+        ],
       );
 
       return foundTask;
@@ -137,12 +143,39 @@ export class TasksService {
         {},
         {
           queryDto,
-          populate: {
-            path: 'assignedTo',
-            select: { createdAt: 0, updatedAt: 0, password: 0 },
-          },
+          populate: [
+            {
+              path: 'assignedTo',
+              select: { createdAt: 0, updatedAt: 0, password: 0 },
+            },
+            {
+              path: 'comments.user',
+              select: { createdAt: 0, updatedAt: 0, password: 0 },
+            },
+          ],
         },
       );
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  async addCommentToTask(
+    taskId: string,
+    text: string,
+    currentUser: JwtPayload,
+  ) {
+    try {
+      if (!ObjectId.isValid(taskId))
+        throw new BadRequestException('Id not valid!');
+
+      const updatedTaskResult = await this.tasksRepository.updateOne(
+        {
+          _id: new ObjectId(taskId),
+        },
+        { $push: { comments: { text, user: currentUser.sub } } },
+      );
+      return updatedTaskResult;
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }

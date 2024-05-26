@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, PopulateOptions, UpdateQuery } from 'mongoose';
-import { Task } from './task.schema';
+import { Task } from './models/task.schema';
 import { QueryDto } from './dto/query.dto';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class TasksRepository {
   async findOne(
     filterQuery: FilterQuery<Task>,
     projection: { [key in keyof Task]?: 0 | 1 } = {},
-    populate?: PopulateOptions,
+    populate?: PopulateOptions[],
   ) {
     try {
       return await this.taskModel.findOne(filterQuery, projection, {
@@ -43,7 +43,7 @@ export class TasksRepository {
     projection: { [key in keyof Task]?: 0 | 1 } = {},
     options: {
       queryDto: QueryDto;
-      populate?: PopulateOptions;
+      populate?: PopulateOptions[];
     },
   ) {
     return this.taskModel

@@ -24,6 +24,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { AssignTaskDto } from './dto/assign-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { QueryDto } from './dto/query.dto';
+import { AddCommentDto } from './dto/add-comment.dto';
 
 @ApiTags('tasks')
 @UseGuards(JwtAuthGuard)
@@ -68,6 +69,22 @@ export class TasksController {
   @Put('/assign')
   assignTaskToUser(@Body() assignTaskDto: AssignTaskDto) {
     return this.tasksService.assignTaskToUser(assignTaskDto);
+  }
+
+  @ApiOperation({
+    description: 'Endpoint to add a comment to a task.',
+  })
+  @Put('/:id/comment')
+  addCommentToTask(
+    @CurrentUser() currentUser: JwtPayload,
+    @Param('id') taskId: string,
+    @Body() addCommentDto: AddCommentDto,
+  ) {
+    return this.tasksService.addCommentToTask(
+      taskId,
+      addCommentDto.text,
+      currentUser,
+    );
   }
 
   @ApiOperation({
