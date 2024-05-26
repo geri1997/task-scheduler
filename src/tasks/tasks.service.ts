@@ -139,6 +139,9 @@ export class TasksService {
               $lt: new Date(queryDto.dateUpdated).setUTCHours(23, 59, 59, 999),
             },
           }),
+          ...(queryDto.search && {
+            title: { $regex: '.*' + queryDto.search + '.*', $options: 'i' },
+          }),
         },
         {},
         {

@@ -104,4 +104,15 @@ export class QueryDto {
   @IsNotEmpty()
   @IsOptional()
   status?: TaskStatus;
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Search for tasks that contain the searched text(case insensitive) in the title.',
+    example: 'as a user I sh',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  search?: string;
 }
