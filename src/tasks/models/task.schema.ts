@@ -8,7 +8,7 @@ import { TaskType } from '../enum/task-type.enum';
 export type TaskDocument = HydratedDocument<Task>;
 
 @Schema({ timestamps: true })
-export class Task extends Document {
+export class Task {
   @Prop({ required: true })
   title: string;
 
@@ -31,14 +31,15 @@ export class Task extends Document {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: User.name,
+    default: null,
   })
   assignedTo?: string | User;
 
-  @Prop([String])
-  attachments?: string[];
-
   @Prop({ required: false, default: [], type: [Comment] })
   comments: Comment[];
+
+  @Prop({ default: null })
+  completedAt: Date;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

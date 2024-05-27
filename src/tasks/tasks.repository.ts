@@ -1,6 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, PopulateOptions, UpdateQuery } from 'mongoose';
+import {
+  FilterQuery,
+  Model,
+  PipelineStage,
+  PopulateOptions,
+  UpdateQuery,
+} from 'mongoose';
 import { Task } from './models/task.schema';
 import { QueryDto } from './dto/query.dto';
 
@@ -64,5 +70,9 @@ export class TasksRepository {
     } catch (error) {
       throw new BadRequestException('Something went wrong when deletig task!');
     }
+  }
+
+  async getAggregation(pipeline: PipelineStage[]) {
+    return this.taskModel.aggregate(pipeline);
   }
 }

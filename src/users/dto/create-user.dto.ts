@@ -35,7 +35,11 @@ export class CreateUserDto {
   })
   password: string;
 
-  @ApiProperty({ example: 'Software Engineer', required: false })
+  @ApiProperty({
+    example: 'Software Engineer',
+    required: false,
+    description: 'Job role',
+  })
   @IsString()
   @IsNotEmpty()
   @IsOptional()

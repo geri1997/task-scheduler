@@ -17,6 +17,4 @@ export class CreateTaskDto {
   @IsEnum(TaskType)
   @IsNotEmpty()
   type: TaskType;
-
-  attachments?: string[];
 }

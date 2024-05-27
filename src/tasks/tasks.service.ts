@@ -1,4 +1,9 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { TasksRepository } from './tasks.repository';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { Task } from './models/task.schema';
@@ -8,6 +13,7 @@ import { AssignTaskDto } from './dto/assign-task.dto';
 import { UsersService } from 'src/users/users.service';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { QueryDto } from './dto/query.dto';
+import { TaskStatus } from './enum/task-status.enum';
 
 @Injectable()
 export class TasksService {
@@ -18,13 +24,12 @@ export class TasksService {
 
   async createTask(
     createTaskDto: CreateTaskDto,
-    currentTask: JwtPayload,
+    currentUser: JwtPayload,
   ): Promise<Task> {
     try {
       return await this.tasksRepository.createOne({
         ...createTaskDto,
-        createdBy: currentTask.sub,
-        assignedTo: null,
+        createdBy: currentUser.sub,
       });
     } catch (error) {
       throw new HttpException(error.message, error.status);
@@ -44,6 +49,10 @@ export class TasksService {
           {
             path: 'createdBy',
             select: { password: 0, createdAt: 0, updatedAt: 0 },
+          },
+          {
+            path: 'assignedTo',
+            select: { password: 0, createdAt: 0, updatedAt: 0 },
             populate: {
               path: 'assignedTasks',
               model: Task.name,
@@ -55,6 +64,9 @@ export class TasksService {
           },
         ],
       );
+
+      if (!foundTask)
+        throw new NotFoundException(`Task with id ${id} not found!`);
 
       return foundTask;
     } catch (error) {
@@ -89,8 +101,7 @@ export class TasksService {
       const assignedUser = this.usersService.assignTaskToUser(taskId, userId);
       const promiseArr = [updatedTask, assignedUser];
 
-      await Promise.all(promiseArr);
-      return { success: true };
+      return await Promise.all(promiseArr);
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }
@@ -103,7 +114,12 @@ export class TasksService {
 
       return this.tasksRepository.updateOne(
         { _id: new ObjectId(taskId) },
-        updateTaskDto,
+        {
+          ...updateTaskDto,
+          ...(updateTaskDto.status === TaskStatus.COMPLETED && {
+            completedAt: new Date(),
+          }),
+        },
       );
     } catch (error) {
       throw new HttpException(error.message, error.status);
@@ -114,6 +130,15 @@ export class TasksService {
     try {
       if (!ObjectId.isValid(taskId))
         throw new BadRequestException('Id not valid!');
+
+      const foundTask = await this.tasksRepository.findOne({
+        _id: new ObjectId(taskId),
+      });
+
+      await this.usersService.unassignTaskFromUser(
+        taskId,
+        foundTask._id.toString(),
+      );
 
       return this.tasksRepository.deleteOne({ _id: new ObjectId(taskId) });
     } catch (error) {
@@ -179,6 +204,48 @@ export class TasksService {
         { $push: { comments: { text, user: currentUser.sub } } },
       );
       return updatedTaskResult;
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  async getCompletedMonthlyTasksStats(currentUser: JwtPayload) {
+    try {
+      const dateNow = new Date();
+
+      const dateOneYearAgo = new Date();
+      dateOneYearAgo.setFullYear(dateNow.getFullYear() - 1);
+
+      return await this.tasksRepository.getAggregation([
+        {
+          $match: {
+            assignedTo: new ObjectId(currentUser.sub),
+            status: TaskStatus.COMPLETED,
+            completedAt: {
+              $gte: dateOneYearAgo,
+            },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              month: { $month: '$completedAt' },
+              year: { $year: '$completedAt' },
+            },
+            count: {
+              $count: {},
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            year: '$_id.year',
+            month: '$_id.month',
+            count: 1,
+          },
+        },
+      ]);
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }

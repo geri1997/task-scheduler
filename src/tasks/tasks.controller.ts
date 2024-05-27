@@ -56,6 +56,14 @@ export class TasksController {
   }
 
   @ApiOperation({
+    description: 'Endpoint to get monthly tasks stats.',
+  })
+  @Get('/completed-stats-monthly')
+  getCompletedMonthlyTaskStats(@CurrentUser() currentUser: JwtPayload) {
+    return this.tasksService.getCompletedMonthlyTasksStats(currentUser);
+  }
+
+  @ApiOperation({
     description: 'Endpoint to get a single task by id.',
   })
   @Get('/:id')
