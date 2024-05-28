@@ -6,7 +6,6 @@ import {
 import { UsersRepository } from './users.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.schema';
-import { FilterQuery, PopulateOptions } from 'mongoose';
 import { JwtPayload } from 'src/shared/interfaces/jwt-payload.interface';
 import { ObjectId } from 'mongodb';
 

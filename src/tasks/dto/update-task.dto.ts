@@ -11,17 +11,17 @@ export class UpdateTaskDto {
   @IsEnum(TaskStatus)
   @IsNotEmpty()
   @IsOptional()
-  status: TaskStatus;
+  status?: TaskStatus;
 
   @ApiProperty({ required: false, example: 'Title of task' })
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  title: string;
+  title?: string;
 
   @ApiProperty({ required: false, example: 'Description of task' })
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  description: string;
+  description?: string;
 }

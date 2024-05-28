@@ -112,7 +112,7 @@ export class TasksService {
       if (!ObjectId.isValid(taskId))
         throw new BadRequestException('Id not valid!');
 
-      return this.tasksRepository.updateOne(
+      const result = await this.tasksRepository.updateOne(
         { _id: new ObjectId(taskId) },
         {
           ...updateTaskDto,
@@ -121,6 +121,12 @@ export class TasksService {
           }),
         },
       );
+
+      if (result.modifiedCount === 0) {
+        throw new NotFoundException(`Task with id ${taskId} not found!`);
+      }
+
+      return result;
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }
@@ -135,9 +141,12 @@ export class TasksService {
         _id: new ObjectId(taskId),
       });
 
+      if (!foundTask)
+        throw new NotFoundException(`Task with id ${taskId} not found!`);
+
       await this.usersService.unassignTaskFromUser(
         taskId,
-        foundTask._id.toString(),
+        foundTask.assignedTo.toString(),
       );
 
       return this.tasksRepository.deleteOne({ _id: new ObjectId(taskId) });
