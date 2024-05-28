@@ -28,7 +28,8 @@ In the root directory run:
 
 # How to use
 
-When running locally or with Docker, the server starts at port `3000`. To send requests you can use a tool like Postman or use Swagger by going to `http://localhost:3000/api`.
+When running locally or with Docker, the server starts at port `3000`. To send requests you can use a tool like Postman or use Swagger by going to `/api`.
+Or you can look at an example deployment [here](https://d2-chvg.onrender.com/api). You might need to wait around 1 minute for the instance to spin up.
 
 # Project Architecture
 
